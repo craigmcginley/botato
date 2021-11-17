@@ -18,7 +18,9 @@ module.exports = {
         return;
       }
       const guild = interaction.guild;
-      const members = await guild.members.list();
+      const members = await guild.members.fetch();
+      console.log(`Checking roles of ${members.size} members`);
+
       const targetRole = await interaction.options.getRole('target');
       const targetRoleId = targetRole.id;
       let exemptionRole = await interaction.options.getRole('exemption');
