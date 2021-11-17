@@ -19,9 +19,11 @@ module.exports = {
       }
       const guild = interaction.guild;
       const members = await guild.members.list();
-      const targetRoleId = await interaction.options.getRole('target').id;
+      const targetRole = await interaction.options.getRole('target');
+      const targetRoleId = targetRole.id;
       let exemptionRole = await interaction.options.getRole('exemption');
       let exemptionRoleId = null;
+      let count = 0;
 
       if (exemptionRole) {
         exemptionRoleId = exemptionRole.id;
@@ -36,9 +38,10 @@ module.exports = {
 
         if (roles.cache.some(role => role.id === targetRoleId)) {
           member.roles.remove(targetRoleId);
+          count += 1;
         }
       });
 
-      await interaction.reply('Finished!');
+      await interaction.reply(`Finished! Purged ${count} users from the role '${targetRole.name}'`);
   },
 };
