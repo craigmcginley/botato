@@ -1,3 +1,4 @@
+const { Permissions } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
@@ -12,6 +13,10 @@ module.exports = {
       option.setName('exemption')
         .setDescription('Optional, exempt users who have this role.')),
     async execute(interaction) {
+      if (!interaction.member.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
+        await interaction.reply("You don't have permission to use this.");
+        return;
+      }
       const guild = interaction.guild;
       const members = await guild.members.list();
       const targetRoleId = await interaction.options.getRole('target').id;
