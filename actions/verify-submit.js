@@ -1,4 +1,8 @@
 const {
+  MessageActionRow,
+  MessageButton
+} = require('discord.js');
+const {
   guildId,
   verificationChannelId
 } = require('../variables.js');
@@ -28,19 +32,39 @@ const verifySubmit = async (interaction) => {
     return;
   }
 
-  let message = `**New verification submission**
-    ${user.username}#${user.discriminator}
-    ${guildMember.nickname}
+  let message = `
+    **New verification submission**
+    \`Username:        ${user.username}#${user.discriminator}\`
+    \`Server Nickname: ${guildMember.nickname}\`
   `;
+
+  const reviewRow = new MessageActionRow()
+    .addComponents(
+      new MessageButton()
+        .setCustomId(`verify-approve--${user.id}`)
+        .setLabel('Approve')
+        .setStyle('SUCCESS')
+    )
+    .addComponents(
+      new MessageButton()
+        .setCustomId(`verify-reject--${user.id}`)
+        .setLabel('Reject')
+        .setStyle('DANGER')
+      );
 
   guild.channels.cache.get(verificationChannelId).send({
     content: message,
-    files: [file]
+    files: [file],
+    components: [reviewRow]
   });
 
   // TODO: How to clean up the button after submitted
   await interaction.update({
-    content: 'Submitted!'
+    components: []
+  });
+
+  await interaction.followUp({
+    content: 'Great! We\'ll review your submission soon and get back to you.'
   });
 }
 

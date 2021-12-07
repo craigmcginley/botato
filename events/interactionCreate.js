@@ -1,5 +1,8 @@
-const { verifySubmit } = require('../actions/verify-submit.js');
 const { verify } = require('../actions/verify.js');
+const { verifySubmit } = require('../actions/verify-submit.js');
+const { verifyApprove } = require('../actions/verify-approve.js');
+const { verifyReject } = require('../actions/verify-reject.js');
+
 
 module.exports = {
   name: 'interactionCreate',
@@ -23,14 +26,30 @@ module.exports = {
 
     if (interaction.isButton()) {
       const { customId } = interaction;
+      const params = customId.split('--');
+      const action = params[0];
 
       try {
-        switch (customId) {
+        switch (action) {
           case 'verify':
             verify(interaction);
             break;
           case 'verify-submit':
             verifySubmit(interaction);
+            break;
+          case 'verify-approve':
+            if (!params[1]) {
+              await interaction.reply({ content: 'There was an error while executing this action.', ephemeral: true });
+              return;
+            }
+            verifyApprove(interaction, params[1]);
+            break;
+          case 'verify-reject':
+            if (!params[1]) {
+              await interaction.reply({ content: 'There was an error while executing this action.', ephemeral: true });
+              return;
+            }
+            verifyReject(interaction, params[1]);
             break;
           default:
             await interaction.reply({ content: 'There was an error while executing this action.', ephemeral: true });
