@@ -58,7 +58,6 @@ const verifySubmit = async (interaction) => {
     components: [reviewRow]
   });
 
-  // TODO: How to clean up the button after submitted
   await interaction.update({
     components: []
   });

@@ -4,6 +4,8 @@ const {
   MessageSelectMenu,
 } = require('discord.js');
 
+const { rejectionReasons } = require('../constants.js');
+
 const verifyReject = async (interaction, userId) => {
   try {
     const rejectReason = new MessageActionRow()
@@ -11,33 +13,7 @@ const verifyReject = async (interaction, userId) => {
         new MessageSelectMenu()
           .setCustomId('verify-reject-reason')
           .setPlaceholder('Reason for rejection')
-          .addOptions([
-            {
-              label: 'Incorrect server',
-              description: 'Player is not on "Live-1" server.',
-              value: 'incorrect-server',
-            },
-            {
-              label: 'Not a Warden',
-              description: 'Player is not a member of the Warden faction.',
-              value: 'not-warden',
-            },
-            {
-              label: 'Insufficient time played',
-              description: 'Insufficient time played.',
-              value: 'insufficient-time',
-            },
-            {
-              label: 'Server nickname mismatch',
-              description: 'The player\'s nickname in The Dawg House server does not match their steam name in game.',
-              value: 'name-mismatch',
-            },
-            {
-              label: 'Other',
-              description: 'You will DM the player with the reason they failed verification.',
-              value: 'other',
-            },
-          ]),
+          .addOptions(rejectionReasons),
       );
 
     // Ask the mod for the reason for rejection
@@ -54,22 +30,32 @@ const verifyReject = async (interaction, userId) => {
     const onSelect = async (i) => {
       const reasonId = i.values[0];
 
-      const rejectEmbed = new MessageEmbed()
+      const rejectEmbedVerifyChannel = new MessageEmbed()
         .setColor('RED')
-        .setTitle('Rejected application')
+        .setTitle('Rejected')
         .setDescription(`Reason: ${reasonId}`)
         .setTimestamp();
 
       // Summarize rejection in embed
       await i.update({
-        embeds: [rejectEmbed],
+        embeds: [rejectEmbedVerifyChannel],
         components: []
       });
+
+      const reason = rejectionReasons.find(reason => reason.value === reasonId);
+
+      const rejectEmbedUserDM = new MessageEmbed()
+        .setColor('RED')
+        .setTitle('Failed verification')
+        .setDescription(reason.explanation)
+        .setTimestamp();
 
       // Notify user
       interaction.client.users.fetch(userId)
         .then(user => {
-          user.send(reasonId); // TODO
+          user.send({
+            embeds: [rejectEmbedUserDM]
+          });
         })
         .catch(err => {
           console.log(err);

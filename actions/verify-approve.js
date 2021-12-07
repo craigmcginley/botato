@@ -7,20 +7,20 @@ const {
 
 const verifyApprove = async (interaction, userId) => {
   try {
-    const approveEmbedMod = new MessageEmbed()
+    const approveEmbedVerifyChannel = new MessageEmbed()
       .setColor('GREEN')
-      .setTitle('Approved application')
+      .setTitle('Approved')
       .setTimestamp();
 
     // Summarize approval to signify it's finished
     interaction.update({
-      embeds: [approveEmbedMod],
+      embeds: [approveEmbedVerifyChannel],
       components: [],
     });
 
-    const approveEmbedUser = new MessageEmbed()
+    const approveEmbedUserDM = new MessageEmbed()
       .setColor('GREEN')
-      .setTitle('Approved application')
+      .setTitle('Verified')
       .setDescription(`You've been verified! Please read the instructions in <#${welcomeChannelId}> to finish your join process, and we'll see you out there!`)
       .setTimestamp();
 
@@ -30,7 +30,7 @@ const verifyApprove = async (interaction, userId) => {
         .then(member => {
           member.roles.add(verifiedRole)
           member.send({
-            embeds: [approveEmbedUser]
+            embeds: [approveEmbedUserDM]
           });
         })
         .catch(err => {
