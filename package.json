@@ -1,12 +1,15 @@
 {
   "name": "botato",
   "version": "0.1.1",
+  "engines": {
+    "node": "16.x"
+  },
   "description": "Discord bot with utilities for managing member roles.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "deploy": "node deploy-commands.js",
-    "postinstall": "npm run deploy",
+    "heroku-postinstall": "npm run deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "craigmcginley",
