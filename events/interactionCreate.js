@@ -35,7 +35,11 @@ module.exports = {
             verify(interaction);
             break;
           case 'verify-submit':
-            verifySubmit(interaction);
+            if (!params[1]) {
+              await interaction.reply({ content: 'There was an error while executing this action.', ephemeral: true });
+              return;
+            }
+            verifySubmit(interaction, params[1]);
             break;
           case 'verify-approve':
             if (!params[1]) {

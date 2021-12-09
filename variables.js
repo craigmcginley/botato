@@ -3,10 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 module.exports = {
+  databaseUrl: process.env.DATABASE_URL,
   token: process.env.DISCORD_TOKEN,
   clientId: process.env.DISCORD_CLIENT_ID,
-  guildId: process.env.DISCORD_GUILD_ID,
-  verificationChannelId: process.env.VERIFICATION_CHANNEL_ID,
-  welcomeChannelId: process.env.WELCOME_CHANNEL_ID,
-  verifiedRole: process.env.VERIFIED_ROLE,
 };

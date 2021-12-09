@@ -4,16 +4,25 @@ const {
   MessageSelectMenu,
 } = require('discord.js');
 
-const { rejectionReasons } = require('../constants.js');
+const { models } = require('../db/sequelize.js');
+
+const {
+  CHANNEL_TYPES,
+  REJECTION_REASONS
+} = require('../constants.js');
+
+const { Guild, Channel } = models;
 
 const verifyReject = async (interaction, userId) => {
   try {
+    let imageUrl = await interaction.message.attachments.first().url;
+
     const rejectReason = new MessageActionRow()
       .addComponents(
         new MessageSelectMenu()
           .setCustomId('verify-reject-reason')
           .setPlaceholder('Reason for rejection')
-          .addOptions(rejectionReasons),
+          .addOptions(REJECTION_REASONS),
       );
 
     // Ask the mod for the reason for rejection
@@ -30,19 +39,41 @@ const verifyReject = async (interaction, userId) => {
     const onSelect = async (i) => {
       const reasonId = i.values[0];
 
-      const rejectEmbedVerifyChannel = new MessageEmbed()
+      const applicant = await interaction.guild.members.fetch(userId);
+
+      const rejectEmbedVerificationChannel = new MessageEmbed()
         .setColor('RED')
         .setTitle('Rejected')
-        .setDescription(`Reason: ${reasonId}`)
+        .addFields(
+          { name: 'Profile', value: `<@${applicant.id}>`, inline: true},
+          { name: 'Username', value: `${applicant.user.username}#${applicant.user.discriminator}`, inline: true },
+          { name: 'Nickname', value: `${applicant.nickname}`, inline: true },
+          { name: '\u200B', value: '\u200B' },
+          { name: 'Reviewed by', value: `<@${i.user.id}>`, inline: true },
+          { name: 'Reason', value: reasonId, inline: true }
+        )
+        .setImage(imageUrl)
         .setTimestamp();
 
-      // Summarize rejection in embed
-      await i.update({
-        embeds: [rejectEmbedVerifyChannel],
-        components: []
+      const guild = interaction.guild;
+
+      const guildModel = await Guild.findOne({
+        where: {
+          discord_id: guild.id
+        }
+      });
+      const channels = await guildModel.getChannels()
+      const channelModel = channels.find(channel => channel.type === CHANNEL_TYPES.REJECTED);
+
+      // Delete the message from the pending channel
+      await i.message.delete();
+
+      // Summarize rejection as an embed in the rejected channel
+      guild.channels.cache.get(channelModel.discord_id).send({
+        embeds: [rejectEmbedVerificationChannel]
       });
 
-      const reason = rejectionReasons.find(reason => reason.value === reasonId);
+      const reason = REJECTION_REASONS.find(reason => reason.value === reasonId);
 
       const rejectEmbedUserDM = new MessageEmbed()
         .setColor('RED')
@@ -50,16 +81,10 @@ const verifyReject = async (interaction, userId) => {
         .setDescription(reason.explanation)
         .setTimestamp();
 
-      // Notify user
-      interaction.client.users.fetch(userId)
-        .then(user => {
-          user.send({
-            embeds: [rejectEmbedUserDM]
-          });
-        })
-        .catch(err => {
-          console.log(err);
-        });
+      // Notify user why they were rejected
+      await applicant.send({
+        embeds: [rejectEmbedUserDM]
+      });
     }
 
     // Wait for the mod to follow up with reason selection

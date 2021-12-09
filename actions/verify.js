@@ -39,7 +39,7 @@ const verify = async (interaction) => {
     const submitAction = new MessageActionRow()
       .addComponents(
         new MessageButton()
-          .setCustomId('verify-submit')
+          .setCustomId(`verify-submit--${interaction.guildId}`)
           .setLabel('Submit')
           .setStyle('PRIMARY')
       );

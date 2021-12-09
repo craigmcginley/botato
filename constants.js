@@ -1,5 +1,5 @@
 module.exports = {
-  rejectionReasons: [
+  REJECTION_REASONS: [
     {
       label: 'Incorrect server',
       description: 'Character is not on "Live-1" server.',
@@ -30,5 +30,16 @@ module.exports = {
       explanation: 'Your verification did not meet one of our criteria. A SPUD officer will DM you with further details.',
       value: 'other',
     },
-  ]
+  ],
+  CHANNEL_TYPES: {
+    JOIN: 'join',
+    PENDING: 'pending',
+    APPROVED: 'approved',
+    REJECTED: 'rejected',
+    WELCOME: 'welcome',
+    CATEGORY: 'category'
+  },
+  ROLE_TYPES: {
+    VERIFIED: 'verified'
+  }
 };

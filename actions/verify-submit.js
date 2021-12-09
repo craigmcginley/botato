@@ -2,21 +2,31 @@ const {
   MessageActionRow,
   MessageButton
 } = require('discord.js');
-const {
-  guildId,
-  verificationChannelId
-} = require('../variables.js');
+
+const { models } = require('../db/sequelize.js');
+
+const { CHANNEL_TYPES } = require('../constants.js');
+
+const { Guild, Channel } = models;
 
 const sortByCreatedTimestamp = (a, b) => {
   b.createdTimestamp - a.createdTimestamp;
 };
 
-const verifySubmit = async (interaction) => {
+const verifySubmit = async (interaction, guildId) => {
   const { client, channelId, user } = interaction;
-  const guild = client.guilds.cache.get(guildId);
+  const guild = interaction.client.guilds.cache.get(guildId);
   const guildMember = guild.members.cache.get(user.id);
-  const channel = client.channels.cache.get(channelId);
-  const messages = await channel.messages.fetch();
+  const dmChannel = client.channels.cache.get(channelId);
+  const guildModel = await Guild.findOne({
+    where: {
+      discord_id: guild.id
+    }
+  });
+  const channels = await guildModel.getChannels()
+  const channelModel = channels.find(channel => channel.type === CHANNEL_TYPES.PENDING);
+
+  const messages = await dmChannel.messages.fetch();
   let file = null;
 
   messages.sort(sortByCreatedTimestamp).some(message => {
@@ -36,6 +46,7 @@ const verifySubmit = async (interaction) => {
     **New verification submission**
     \`Username:        ${user.username}#${user.discriminator}\`
     \`Server Nickname: ${guildMember.nickname}\`
+    <@${user.id}>
   `;
 
   const reviewRow = new MessageActionRow()
@@ -52,7 +63,7 @@ const verifySubmit = async (interaction) => {
         .setStyle('DANGER')
       );
 
-  guild.channels.cache.get(verificationChannelId).send({
+  guild.channels.cache.get(channelModel.discord_id).send({
     content: message,
     files: [file],
     components: [reviewRow]
