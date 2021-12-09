@@ -11,6 +11,9 @@ const sequelize = new Sequelize(databaseUrl, {
   }
 });
 
+// For use locally, without ssl cause lazy
+// const sequelize = new Sequelize(databaseUrl);
+
 const modelDefiners = [
   require('./models/channel.js'),
   require('./models/guild.js'),

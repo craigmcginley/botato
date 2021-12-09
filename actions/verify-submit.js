@@ -26,19 +26,35 @@ const verifySubmit = async (interaction, guildId) => {
   const channels = await guildModel.getChannels()
   const channelModel = channels.find(channel => channel.type === CHANNEL_TYPES.PENDING);
 
-  const messages = await dmChannel.messages.fetch();
+  let messages = await dmChannel.messages.fetch();
+  messages =  messages.sort(sortByCreatedTimestamp);
   let file = null;
+  let botMessageTime = null;
 
-  messages.sort(sortByCreatedTimestamp).some(message => {
-    if (message.author.id === user.id && message.attachments) {
-      let sortedAttachments = message.attachments.sort(sortByCreatedTimestamp)
-      file = sortedAttachments.first();
+  messages.some(message => {
+    if (message.author.bot) {
+      botMessageTime = message.createdTimestamp;
       return true;
+    };
+  });
+
+  messages.some(message => {
+    if (message.author.id === user.id && message.attachments) {
+      let sortedAttachments = message.attachments.sort(sortByCreatedTimestamp);
+      return sortedAttachments.some(attachment => {
+        if (attachment.contentType.includes('image') && message.createdTimestamp > botMessageTime) {
+          file = attachment;
+          return true;
+        }
+      })
     }
   });
 
   if (!file) {
-    await interaction.reply(`You didn't attach any images! Please try again after uploading your screenshot.`);
+    await interaction.reply({
+      content: 'You didn\'t attach any images! Please try again after uploading your screenshot directly to this DM channel.',
+      ephemeral: true
+    });
     return;
   }
 
