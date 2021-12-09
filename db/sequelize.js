@@ -2,7 +2,14 @@ const Sequelize = require('sequelize');
 const { databaseUrl } = require('../variables.js');
 const { CHANNEL_TYPES } = require('../constants.js');
 
-const sequelize = new Sequelize(databaseUrl);
+const sequelize = new Sequelize(databaseUrl, {
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
+  }
+});
 
 const modelDefiners = [
   require('./models/channel.js'),
