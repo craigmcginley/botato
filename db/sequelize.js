@@ -35,7 +35,6 @@ Channel.belongsTo(Guild);
 Role.belongsTo(Guild);
 Member.belongsTo(Guild);
 
-// Nuke everything, reset to model schemas
-// sequelize.sync({ force: true });
+sequelize.sync();
 
 module.exports = sequelize;
