@@ -64,6 +64,8 @@ const verifyReject = async (interaction, userId) => {
       });
       const channels = await guildModel.getChannels()
       const channelModel = channels.find(channel => channel.type === CHANNEL_TYPES.REJECTED);
+      const members = await guildModel.getMembers();
+      const member = members.find(member => member.discord_id === userId);
 
       // Delete the message from the pending channel
       await i.message.delete();
@@ -85,6 +87,9 @@ const verifyReject = async (interaction, userId) => {
       await applicant.send({
         embeds: [rejectEmbedUserDM]
       });
+
+      // Close member application process in database so they can open another
+      member.destroy();
     }
 
     // Wait for the mod to follow up with reason selection

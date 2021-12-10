@@ -15,22 +15,25 @@ const sequelize = new Sequelize(databaseUrl, {
 // const sequelize = new Sequelize(databaseUrl);
 
 const modelDefiners = [
-  require('./models/channel.js'),
   require('./models/guild.js'),
+  require('./models/channel.js'),
   require('./models/role.js'),
+  require('./models/member.js'),
 ];
 
 for (const modelDefiner of modelDefiners) {
   modelDefiner(sequelize);
 }
 
-const { ChannelType, Channel, Guild, Role } = sequelize.models;
+const { Guild, Channel, Role, Member } = sequelize.models;
 
 // create relationships for models
 Guild.hasMany(Channel);
 Guild.hasMany(Role);
+Guild.hasMany(Member);
 Channel.belongsTo(Guild);
 Role.belongsTo(Guild);
+Member.belongsTo(Guild);
 
 // Nuke everything, reset to model schemas
 // sequelize.sync({ force: true });

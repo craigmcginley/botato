@@ -34,6 +34,7 @@ module.exports = {
 
         const channels = await guildInstance.getChannels();
         const roles = await guildInstance.getRoles();
+        const members = await guildInstance.getMembers();
 
         channels.filter(channel => {
           return channel.type === CHANNEL_TYPES.CATEGORY
@@ -47,6 +48,7 @@ module.exports = {
 
         channels.map(async channel => await channel.destroy());
         roles.map(async role => await role.destroy());
+        members.map(async member => await member.destroy());
 
         guildInstance.destroy();
 

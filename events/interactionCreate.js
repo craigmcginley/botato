@@ -8,7 +8,7 @@ module.exports = {
   name: 'interactionCreate',
   async execute(interaction) {
     if (!(interaction.isCommand() || interaction.isButton())) return;
-    console.log(`${interaction.user.tag} triggered ${interaction.commandName || interaction.customId} from ${interaction.channel.name ? '#' + interaction.channel.name : 'DM'}`);
+    console.log(`${interaction.user.tag} triggered ${interaction.commandName || interaction.customId} from ${interaction.channel && interaction.channel.name ? '#' + interaction.channel.name : 'DM'}`);
 
     if (interaction.isCommand()) {
       const { client, commandName } = interaction;

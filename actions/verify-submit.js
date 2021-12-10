@@ -16,8 +16,8 @@ const sortByCreatedTimestamp = (a, b) => {
 const verifySubmit = async (interaction, guildId) => {
   const { client, channelId, user } = interaction;
   const guild = interaction.client.guilds.cache.get(guildId);
-  const guildMember = guild.members.cache.get(user.id);
-  const dmChannel = client.channels.cache.get(channelId);
+  const guildMember = await guild.members.fetch(user.id);
+  const dmChannel = await client.channels.fetch(channelId);
   const guildModel = await Guild.findOne({
     where: {
       discord_id: guild.id

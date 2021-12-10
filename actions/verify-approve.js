@@ -8,7 +8,7 @@ const {
   ROLE_TYPES
 } = require('../constants.js');
 
-const { Guild, Channel, Role } = models;
+const { Guild, Channel, Role, Member } = models;
 
 const verifyApprove = async (interaction, userId) => {
   const applicant = await interaction.guild.members.fetch(userId);
@@ -26,6 +26,8 @@ const verifyApprove = async (interaction, userId) => {
   const roles = await guildModel.getRoles();
   const roleModel = roles.find(role => role.type === ROLE_TYPES.VERIFIED);
   const verifiedRole = await guild.roles.cache.get(roleModel.discord_id);
+  const members = await guildModel.getMembers();
+  const member = members.find(member => member.discord_id === userId);
 
   try {
     let imageUrl = await interaction.message.attachments.first().url;
@@ -64,6 +66,10 @@ const verifyApprove = async (interaction, userId) => {
     await applicant.send({
       embeds: [approveEmbedUserDM]
     });
+
+    // Close member application process in database so they can open another
+    member.destroy();
+
   } catch(e) {
     console.log(e);
     await interaction.reply(`Oops! Something went wrong.`);

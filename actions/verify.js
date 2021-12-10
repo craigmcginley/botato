@@ -4,6 +4,12 @@ const {
   MessageButton
 } = require('discord.js');
 
+const { models } = require('../db/sequelize.js');
+
+const { CHANNEL_TYPES } = require('../constants.js');
+
+const { Guild, Member } = models;
+
 const verify = async (interaction) => {
   try {
     const user = interaction.user;
@@ -44,6 +50,38 @@ const verify = async (interaction) => {
           .setStyle('PRIMARY')
       );
 
+    const guild = await Guild.findOne({
+      where: {
+        discord_id: interaction.guild.id
+      }
+    });
+
+    // Make sure the user doesn't already have an application open for this guild
+    const members = await guild.getMembers();
+    let memberPending = false;
+
+    members.some(member => {
+      if (member.discord_id === user.id) {
+        memberPending = true;
+        return true;
+      }
+    })
+
+    if (memberPending) {
+      interaction.reply({
+        content: "You already have a verification request open!",
+        ephemeral: true
+      });
+
+      return;
+    }
+
+    const member = await Member.create({
+      discord_id: user.id
+    });
+
+    await member.setGuild(guild);
+
     user.send({
       embeds: [verifyEmbed],
       components: [submitAction]
@@ -52,7 +90,10 @@ const verify = async (interaction) => {
     interaction.deferUpdate();
   } catch(e) {
     console.log(e);
-    await interaction.reply(`Oops! Something went wrong.`);
+    await interaction.reply({
+      content: 'Oops! Something went wrong.',
+      ephemeral: true
+    });
   }
 }
 
