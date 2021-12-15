@@ -6,7 +6,7 @@ let sequelize = null;
 
 
 if (process.env.PRODUCTION) {
-  equelize = new Sequelize(databaseUrl, {
+  sequelize = new Sequelize(databaseUrl, {
     dialectOptions: {
       ssl: {
         require: true,
