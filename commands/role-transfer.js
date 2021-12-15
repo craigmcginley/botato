@@ -12,7 +12,10 @@ module.exports = {
     .addRoleOption(option =>
       option.setName('to')
         .setDescription('The role you want to move users to.')
-        .setRequired(true)),
+        .setRequired(true))
+    .addRoleOption(option =>
+      option.setName('exemption')
+        .setDescription('Optional, exempt users who have this role from being transferred.')),
     async execute(interaction) {
       if (!interaction.member.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
         await interaction.reply("You don't have permission to use this.");
@@ -26,10 +29,20 @@ module.exports = {
       const fromRoleId = fromRole.id;
       const toRole = await interaction.options.getRole('to');
       const toRoleId = toRole.id;
+      let exemptionRole = await interaction.options.getRole('exemption');
+      let exemptionRoleId = null;
       let count = 0;
+
+      if (exemptionRole) {
+        exemptionRoleId = exemptionRole.id;
+      }
 
       members.forEach(member => {
         const roles = member.roles;
+
+        if (exemptionRoleId && roles.cache.some(role => role.id === exemptionRoleId)) {
+          return;
+        }
 
         if (roles.cache.some(role => role.id === fromRoleId)) {
           member.roles.remove(fromRoleId);
