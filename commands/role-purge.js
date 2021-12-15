@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('purge-role')
+    .setName('role-purge')
     .setDescription('Removes all users from the specified role.')
     .addRoleOption(option =>
       option.setName('target')
