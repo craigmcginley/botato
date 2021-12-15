@@ -71,18 +71,30 @@ const verifySubmit = async (interaction, guildId) => {
         .setCustomId(`verify-approve--${user.id}`)
         .setLabel('Approve')
         .setStyle('SUCCESS')
+        .setDisabled(true)
     )
     .addComponents(
       new MessageButton()
         .setCustomId(`verify-reject--${user.id}`)
         .setLabel('Reject')
         .setStyle('DANGER')
+        .setDisabled(true)
       );
 
   guild.channels.cache.get(channelModel.discord_id).send({
     content: message,
     files: [file],
     components: [reviewRow]
+  }).then(message => {
+    reviewRow.components.forEach(component => {
+      component.setDisabled(false);
+    });
+
+    setTimeout(() => {
+      message.edit({
+        components: [reviewRow]
+      })
+    }, 5000);
   });
 
   await interaction.update({
