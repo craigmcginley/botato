@@ -2,17 +2,22 @@ const Sequelize = require('sequelize');
 const { databaseUrl } = require('../variables.js');
 const { CHANNEL_TYPES } = require('../constants.js');
 
-const sequelize = new Sequelize(databaseUrl, {
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false
-    }
-  }
-});
+let sequelize = null;
 
-// For use locally, without ssl cause lazy
-// const sequelize = new Sequelize(databaseUrl);
+
+if (process.env.PRODUCTION) {
+  equelize = new Sequelize(databaseUrl, {
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    }
+  });
+} else {
+  // For use locally, without ssl cause lazy
+  sequelize = new Sequelize(databaseUrl);
+}
 
 const modelDefiners = [
   require('./models/guild.js'),

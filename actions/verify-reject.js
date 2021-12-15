@@ -2,6 +2,7 @@ const {
   MessageEmbed,
   MessageActionRow,
   MessageSelectMenu,
+  MessageButton,
 } = require('discord.js');
 
 const { models } = require('../db/sequelize.js');
@@ -16,6 +17,7 @@ const { Guild, Channel } = models;
 const verifyReject = async (interaction, userId) => {
   try {
     let imageUrl = await interaction.message.attachments.first().url;
+    const applicant = await interaction.guild.members.fetch(userId);
 
     const rejectReason = new MessageActionRow()
       .addComponents(
@@ -26,8 +28,9 @@ const verifyReject = async (interaction, userId) => {
       );
 
     // Ask the mod for the reason for rejection
-    await interaction.update({
-      components: [rejectReason]
+    const updatedMessage = await interaction.update({
+      components: [rejectReason],
+      fetchReply: true,
     });
 
     // Make sure it's the interaction and mod user we want to respond
@@ -38,8 +41,6 @@ const verifyReject = async (interaction, userId) => {
     // Once the mod responds, encapsulate the reason for rejection and notify applicant
     const onSelect = async (i) => {
       const reasonId = i.values[0];
-
-      const applicant = await interaction.guild.members.fetch(userId);
 
       const rejectEmbedVerificationChannel = new MessageEmbed()
         .setColor('RED')
@@ -93,10 +94,27 @@ const verifyReject = async (interaction, userId) => {
     }
 
     // Wait for the mod to follow up with reason selection
-    await interaction.message.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 10000 })
+    await interaction.message.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 60000 })
       .then(onSelect)
-      .catch(err => {
-        console.log(err);
+      .catch(async err => {
+        // If the mod didn't select a reason in adequate time, revert back to approve/reject buttons
+        const reviewRow = new MessageActionRow()
+          .addComponents(
+            new MessageButton()
+              .setCustomId(`verify-approve--${applicant.id}`)
+              .setLabel('Approve')
+              .setStyle('SUCCESS')
+          )
+          .addComponents(
+            new MessageButton()
+              .setCustomId(`verify-reject--${applicant.id}`)
+              .setLabel('Reject')
+              .setStyle('DANGER')
+            );
+
+        await updatedMessage.edit({
+          components: [reviewRow]
+        });
       });
 
   } catch(e) {
