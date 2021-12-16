@@ -13,6 +13,9 @@ module.exports = {
       option.setName('to')
         .setDescription('The role you want to move users to.')
         .setRequired(true))
+    .addBooleanOption(option =>
+      option.setName('keep-original')
+        .setDescription(`Optional, keep the 'from' role and just add the 'to' role.`))
     .addRoleOption(option =>
       option.setName('exemption')
         .setDescription('Optional, exempt users who have this role from being transferred.')),
@@ -30,6 +33,7 @@ module.exports = {
       const toRole = await interaction.options.getRole('to');
       const toRoleId = toRole.id;
       let exemptionRole = await interaction.options.getRole('exemption');
+      let keepOriginal = await interaction.options.getBoolean('keep-original');
       let exemptionRoleId = null;
       let count = 0;
 
@@ -45,7 +49,9 @@ module.exports = {
         }
 
         if (roles.cache.some(role => role.id === fromRoleId)) {
-          member.roles.remove(fromRoleId);
+          if (!keepOriginal) {
+            member.roles.remove(fromRoleId);
+          }
           member.roles.add(toRoleId);
           count += 1;
         }
