@@ -11,25 +11,19 @@ const {
 const { Guild, Channel, Role, Member } = models;
 
 const verifyApprove = async (interaction, userId) => {
-  const applicant = await interaction.guild.members.fetch(userId)
-    .then(() => {
-
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  let applicant = null;
   const guild = interaction.guild;
-
   const guildModel = await Guild.findOne({
     where: {
       discord_id: guild.id
     }
   });
-
   const members = await guildModel.getMembers();
   const member = members.find(member => member.discord_id === userId);
 
-  if (!applicant) {
+  try {
+    applicant = await interaction.guild.members.fetch(userId)
+  } catch {
     member.destroy();
     await interaction.message.delete();
     await interaction.reply({
