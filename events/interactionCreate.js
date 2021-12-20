@@ -2,6 +2,7 @@ const { verify } = require('../actions/verify.js');
 const { verifySubmit } = require('../actions/verify-submit.js');
 const { verifyApprove } = require('../actions/verify-approve.js');
 const { verifyReject } = require('../actions/verify-reject.js');
+const { verifyAlly } = require('../actions/verify-ally.js');
 
 
 module.exports = {
@@ -54,6 +55,13 @@ module.exports = {
               return;
             }
             verifyReject(interaction, params[1]);
+            break;
+          case 'verify-ally':
+            if (!params[1]) {
+              await interaction.reply({ content: 'There was an error while executing this action.', ephemeral: true });
+              return;
+            }
+            verifyAlly(interaction, params[1]);
             break;
           default:
             await interaction.reply({ content: 'There was an error while executing this action.', ephemeral: true });

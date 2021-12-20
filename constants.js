@@ -40,6 +40,7 @@ module.exports = {
     CATEGORY: 'category'
   },
   ROLE_TYPES: {
-    VERIFIED: 'verified'
+    VERIFIED: 'verified',
+    ALLY: 'ally'
   }
 };

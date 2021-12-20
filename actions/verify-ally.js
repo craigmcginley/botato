@@ -10,14 +10,8 @@ const {
 
 const { Guild, Channel, Role, Member } = models;
 
-const verifyApprove = async (interaction, userId) => {
-  const applicant = await interaction.guild.members.fetch(userId)
-    .then(() => {
-
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+const verifyAlly = async (interaction, userId) => {
+  const applicant = await interaction.guild.members.fetch(userId);
   const guild = interaction.guild;
 
   const guildModel = await Guild.findOne({
@@ -32,26 +26,22 @@ const verifyApprove = async (interaction, userId) => {
   if (!applicant) {
     member.destroy();
     await interaction.message.delete();
-    await interaction.reply({
-      content: `That user left the server. RIP.`,
-      ephemeral: true
-    });
+    await interaction.reply(`That user left the server. RIP.`);
     return;
   }
 
   const channels = await guildModel.getChannels();
   const approvedChannel = channels.find(channel => channel.type === CHANNEL_TYPES.APPROVED);
-  const welcomeChannel = channels.find(channel => channel.type === CHANNEL_TYPES.WELCOME);
   const roles = await guildModel.getRoles();
-  const roleModel = roles.find(role => role.type === ROLE_TYPES.VERIFIED);
-  const verifiedRole = await guild.roles.cache.get(roleModel.discord_id);
+  const roleModel = roles.find(role => role.type === ROLE_TYPES.ALLY);
+  const allyRole = await guild.roles.cache.get(roleModel.discord_id);
 
   try {
     let imageUrl = await interaction.message.attachments.first().url;
 
     const approveEmbedVerifiedChannel = new MessageEmbed()
-      .setColor('GREEN')
-      .setTitle('Approved')
+      .setColor('FUCHSIA')
+      .setTitle('Approved Ally')
       .addFields(
         { name: 'Profile', value: `<@${applicant.id}>`, inline: true},
         { name: 'Username', value: `${applicant.user.username}#${applicant.user.discriminator}`, inline: true },
@@ -73,11 +63,11 @@ const verifyApprove = async (interaction, userId) => {
     const approveEmbedUserDM = new MessageEmbed()
       .setColor('GREEN')
       .setTitle('Verified')
-      .setDescription(`You've been verified! Please read the instructions in <#${welcomeChannel.discord_id}> to finish your join process, and we'll see you out there!`)
+      .setDescription(`You've been verified and are now a Royal Ally! You have access to the royal-allies chat and our voice channels.`)
       .setTimestamp();
 
-    // Give the user the verified role
-    await applicant.roles.add(verifiedRole.id);
+    // Give the user the ally role
+    await applicant.roles.add(allyRole.id);
 
     // Notify user of approval and next steps
     await applicant.send({
@@ -94,5 +84,5 @@ const verifyApprove = async (interaction, userId) => {
 }
 
 module.exports = {
-  verifyApprove
+  verifyAlly
 };

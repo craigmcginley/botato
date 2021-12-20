@@ -79,6 +79,13 @@ const verifySubmit = async (interaction, guildId) => {
         .setLabel('Reject')
         .setStyle('DANGER')
         .setDisabled(true)
+    )
+    .addComponents(
+      new MessageButton()
+        .setCustomId(`verify-ally--${user.id}`)
+        .setLabel('Royal Ally')
+        .setStyle('SECONDARY')
+        .setDisabled(true)
       );
 
   guild.channels.cache.get(channelModel.discord_id).send({
