@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js');
 
 const { models } = require('../db/sequelize.js');
+const { buildEmbed } = require('../helpers/embed.js');
 
 const {
   CHANNEL_TYPES,
@@ -41,27 +42,19 @@ const verifyApprove = async (interaction, userId) => {
   const verifiedRole = await guild.roles.cache.get(roleModel.discord_id);
 
   try {
-    let imageUrl = await interaction.message.attachments.first().url;
+    const images = [];
+    interaction.message.embeds.forEach(embed => {
+      images.push(embed.image);
+    });
 
-    const approveEmbedVerifiedChannel = new MessageEmbed()
-      .setColor('GREEN')
-      .setTitle('Approved')
-      .addFields(
-        { name: 'Profile', value: `<@${applicant.id}>`, inline: true},
-        { name: 'Username', value: `${applicant.user.username}#${applicant.user.discriminator}`, inline: true },
-        { name: 'Nickname', value: `${applicant.nickname}`, inline: true },
-        { name: '\u200B', value: '\u200B' },
-        { name: 'Reviewed by', value: `<@${interaction.user.id}>`, inline: true },
-      )
-      .setImage(imageUrl)
-      .setTimestamp();
+    const embeds = buildEmbed('Approved', 'GREEN', guild, applicant.user, images, interaction.user);
 
     // Delete the message from the pending channel
     await interaction.message.delete();
 
     // Summarize approval as an embed in the approved channel
     guild.channels.cache.get(approvedChannel.discord_id).send({
-      embeds: [approveEmbedVerifiedChannel]
+      embeds: embeds
     });
 
     const approveEmbedUserDM = new MessageEmbed()
@@ -83,7 +76,7 @@ const verifyApprove = async (interaction, userId) => {
 
   } catch(e) {
     console.log(e);
-    await interaction.reply(`Oops! Something went wrong.`);
+    await interaction.reply({ content: `Oops! Something went wrong.`, ephemeral: true });
   }
 }
 

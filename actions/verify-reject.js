@@ -6,6 +6,7 @@ const {
 } = require('discord.js');
 
 const { models } = require('../db/sequelize.js');
+const { buildEmbed } = require('../helpers/embed.js');
 
 const {
   CHANNEL_TYPES,
@@ -16,7 +17,6 @@ const { Guild, Channel } = models;
 
 const verifyReject = async (interaction, userId) => {
   try {
-    let imageUrl = await interaction.message.attachments.first().url;
     let applicant = null;
     const guild = interaction.guild;
     const guildModel = await Guild.findOne({
@@ -62,45 +62,29 @@ const verifyReject = async (interaction, userId) => {
     const onSelect = async (i) => {
       const reasonId = i.values[0];
 
-      const rejectEmbedVerificationChannel = new MessageEmbed()
-        .setColor('RED')
-        .setTitle('Rejected')
-        .addFields(
-          { name: 'Profile', value: `<@${applicant.id}>`, inline: true},
-          { name: 'Username', value: `${applicant.user.username}#${applicant.user.discriminator}`, inline: true },
-          { name: 'Nickname', value: `${applicant.nickname}`, inline: true },
-          { name: '\u200B', value: '\u200B' },
-          { name: 'Reviewed by', value: `<@${i.user.id}>`, inline: true },
-          { name: 'Reason', value: reasonId, inline: true }
-        )
-        .setImage(imageUrl)
-        .setTimestamp();
-
-      const guild = interaction.guild;
-
-      const guildModel = await Guild.findOne({
-        where: {
-          discord_id: guild.id
-        }
+      const images = [];
+      interaction.message.embeds.forEach(embed => {
+        images.push(embed.image);
       });
+
+      const embeds = buildEmbed('Rejected', 'RED', guild, applicant.user, images, i.user, reasonId);
+
       const channels = await guildModel.getChannels()
       const channelModel = channels.find(channel => channel.type === CHANNEL_TYPES.REJECTED);
-      const members = await guildModel.getMembers();
-      const member = members.find(member => member.discord_id === userId);
 
       // Delete the message from the pending channel
       await i.message.delete();
 
       // Summarize rejection as an embed in the rejected channel
       guild.channels.cache.get(channelModel.discord_id).send({
-        embeds: [rejectEmbedVerificationChannel]
+        embeds: embeds
       });
 
       const reason = REJECTION_REASONS.find(reason => reason.value === reasonId);
 
       const rejectEmbedUserDM = new MessageEmbed()
         .setColor('RED')
-        .setTitle('Failed verification')
+        .setTitle('Verification not approved')
         .setDescription(reason.explanation)
         .setTimestamp();
 
@@ -139,7 +123,7 @@ const verifyReject = async (interaction, userId) => {
 
   } catch(e) {
     console.log(e);
-    await interaction.reply(`Oops! Something went wrong.`);
+    await interaction.reply({ content: `Oops! Something went wrong.`, ephemeral: true });
   }
 }
 

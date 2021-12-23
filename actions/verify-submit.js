@@ -4,6 +4,7 @@ const {
 } = require('discord.js');
 
 const { models } = require('../db/sequelize.js');
+const { buildEmbed } = require('../helpers/embed.js');
 
 const { CHANNEL_TYPES } = require('../constants.js');
 
@@ -28,29 +29,28 @@ const verifySubmit = async (interaction, guildId) => {
 
   let messages = await dmChannel.messages.fetch();
   messages =  messages.sort(sortByCreatedTimestamp);
-  let file = null;
+  let images = [];
   let botMessageTime = null;
 
   messages.some(message => {
-    if (message.author.bot) {
+    if (message.author.bot && !message.ephemeral) {
       botMessageTime = message.createdTimestamp;
       return true;
     };
   });
 
-  messages.some(message => {
+  messages.forEach(message => {
     if (message.author.id === user.id && message.attachments) {
       let sortedAttachments = message.attachments.sort(sortByCreatedTimestamp);
-      return sortedAttachments.some(attachment => {
+      sortedAttachments.forEach(attachment => {
         if (attachment.contentType.includes('image') && message.createdTimestamp > botMessageTime) {
-          file = attachment;
-          return true;
+          images.push(attachment);
         }
       })
     }
   });
 
-  if (!file) {
+  if (!images.length) {
     await interaction.reply({
       content: 'You didn\'t attach any images! Please try again after uploading your screenshot directly to this DM channel.',
       ephemeral: true
@@ -58,12 +58,7 @@ const verifySubmit = async (interaction, guildId) => {
     return;
   }
 
-  let message = `
-    **New verification submission**
-    \`Username:        ${user.username}#${user.discriminator}\`
-    \`Server Nickname: ${guildMember.nickname}\`
-    <@${user.id}>
-  `;
+  const embeds = buildEmbed('New verification submission', 'GREEN', guild, user, images);
 
   const reviewRow = new MessageActionRow()
     .addComponents(
@@ -89,9 +84,8 @@ const verifySubmit = async (interaction, guildId) => {
       );
 
   guild.channels.cache.get(channelModel.discord_id).send({
-    content: message,
-    files: [file],
-    components: [reviewRow]
+    embeds: embeds,
+    components: [reviewRow],
   }).then(message => {
     reviewRow.components.forEach(component => {
       component.setDisabled(false);
