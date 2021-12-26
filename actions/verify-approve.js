@@ -47,7 +47,7 @@ const verifyApprove = async (interaction, userId) => {
       images.push(embed.image);
     });
 
-    const embeds = buildEmbed('Approved', 'GREEN', guild, applicant.user, images, interaction.user);
+    const embeds = buildEmbed('Approved', 'GREEN', guild, applicant, images, interaction.user);
 
     // Delete the message from the pending channel
     await interaction.message.delete();

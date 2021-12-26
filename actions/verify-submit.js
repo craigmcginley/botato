@@ -17,7 +17,7 @@ const sortByCreatedTimestamp = (a, b) => {
 const verifySubmit = async (interaction, guildId) => {
   const { client, channelId, user } = interaction;
   const guild = interaction.client.guilds.cache.get(guildId);
-  const guildMember = await guild.members.fetch(user.id);
+  let applicant = null;
   const dmChannel = await client.channels.fetch(channelId);
   const guildModel = await Guild.findOne({
     where: {
@@ -26,6 +26,16 @@ const verifySubmit = async (interaction, guildId) => {
   });
   const channels = await guildModel.getChannels()
   const channelModel = channels.find(channel => channel.type === CHANNEL_TYPES.PENDING);
+
+  try {
+    applicant = await guild.members.fetch(user.id);
+  } catch {
+    await interaction.reply({
+      content: `You left The Dawg House server! You must join the server to verify as a SPUD.`,
+      ephemeral: true
+    });
+    return;
+  }
 
   let messages = await dmChannel.messages.fetch();
   messages =  messages.sort(sortByCreatedTimestamp);
@@ -58,7 +68,7 @@ const verifySubmit = async (interaction, guildId) => {
     return;
   }
 
-  const embeds = buildEmbed('New verification submission', 'GREEN', guild, user, images);
+  const embeds = buildEmbed('New verification submission', 'GREEN', guild, applicant, images);
 
   const reviewRow = new MessageActionRow()
     .addComponents(

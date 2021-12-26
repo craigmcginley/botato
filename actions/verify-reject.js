@@ -67,7 +67,7 @@ const verifyReject = async (interaction, userId) => {
         images.push(embed.image);
       });
 
-      const embeds = buildEmbed('Rejected', 'RED', guild, applicant.user, images, i.user, reasonId);
+      const embeds = buildEmbed('Rejected', 'RED', guild, applicant, images, i.user, reasonId);
 
       const channels = await guildModel.getChannels()
       const channelModel = channels.find(channel => channel.type === CHANNEL_TYPES.REJECTED);

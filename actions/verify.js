@@ -28,9 +28,9 @@ const verify = async (interaction) => {
 
         1. Take a screenshot of the login screen that shows the above three critical pieces of information (see attached example). Each of these pieces of information is required to be verified.
 
-        2. Post your screenshot below.
+        2. Change your Discord nickname for The Dawg House server to be the same as your in-game name if they don't already match (Right click the server icon and select "Edit server profile"). You will not be approved until these names are the same.
 
-        3. Change your Discord nickname for The Dawg House server to be the same as your in-game name if they don't already match. You will not be approved until these names are the same.
+        3. Post your screenshot below.
 
         4. Click the "Submit" button below. An officer will review your screenshot at their earliest convenience, and you will receive a reply here.
 
@@ -40,7 +40,7 @@ const verify = async (interaction) => {
       )
       .setImage('https://images-ext-2.discordapp.net/external/dzpvSd3hefY-L8SGAAmw2O-t6AMXo9s_g_oXjU6_hVg/https/media.discordapp.net/attachments/891078787138203689/894954670840234034/Login.PNG')
       .setTimestamp()
-      .setFooter(`If you have any questions, don't hesitate to ask a SPUD officer.`);
+      .setFooter(`If you have any questions, you can ask a SPUD officer.`);
 
     const submitAction = new MessageActionRow()
       .addComponents(
