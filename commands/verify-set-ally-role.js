@@ -43,18 +43,36 @@ module.exports = {
           }
         });
 
-        const allyInstance = await Role.create({
-          discord_id: allyRole.id,
-          type: ROLE_TYPES.ALLY
+        const allyInstance = await Role.findOrCreate({
+          where: {
+            GuildId: guildInstance.id,
+            type: ROLE_TYPES.ALLY
+          },
+          defaults: {
+            discord_id: allyRole.id,
+            type: ROLE_TYPES.ALLY
+          }
         });
 
-        const ambassadorInstance = await Role.create({
-          discord_id: ambassadorRole.id,
-          type: ROLE_TYPES.AMBASSADOR
+        const ambassadorInstance = await Role.findOrCreate({
+          where: {
+            GuildId: guildInstance.id,
+            type: ROLE_TYPES.AMBASSADOR
+          },
+          defaults: {
+            discord_id: ambassadorRole.id,
+            type: ROLE_TYPES.AMBASSADOR
+          }
         });
 
-        await allyInstance.setGuild(guildInstance);
-        await ambassadorInstance.setGuild(guildInstance);
+        allyInstance[0].discord_id = allyRole.id;
+        ambassadorInstance[0].discord_id = ambassadorRole.id;
+
+        await allyInstance[0].setGuild(guildInstance);
+        await ambassadorInstance[0].setGuild(guildInstance);
+
+        await allyInstance[0].save();
+        await ambassadorInstance[0].save();
 
         await interaction.reply(`Finished!`);
       } catch(e) {
