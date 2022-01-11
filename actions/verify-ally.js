@@ -11,7 +11,7 @@ const {
 
 const { Guild, Channel, Role, Member } = models;
 
-const verifyAlly = async (interaction, userId) => {
+const verifyAlly = async (interaction, userId, type) => {
   let applicant = null;
   const guild = interaction.guild;
   const guildModel = await Guild.findOne({
@@ -37,7 +37,7 @@ const verifyAlly = async (interaction, userId) => {
   const channels = await guildModel.getChannels();
   const approvedChannel = channels.find(channel => channel.type === CHANNEL_TYPES.APPROVED);
   const roles = await guildModel.getRoles();
-  const roleModel = roles.find(role => role.type === ROLE_TYPES.ALLY);
+  const roleModel = roles.find(role => role.type === type);
   const allyRole = await guild.roles.cache.get(roleModel.discord_id);
 
   try {
@@ -46,7 +46,7 @@ const verifyAlly = async (interaction, userId) => {
       images.push(embed.image);
     });
 
-    const embeds = buildEmbed('Approved Ally', 'FUCHSIA', guild, applicant, images, interaction.user);
+    const embeds = buildEmbed('Approved - ' + type, 'FUCHSIA', guild, applicant, images, interaction.user);
 
     // Delete the message from the pending channel
     await interaction.message.delete();

@@ -6,7 +6,10 @@ const {
 const { models } = require('../db/sequelize.js');
 const { buildEmbed } = require('../helpers/embed.js');
 
-const { CHANNEL_TYPES } = require('../constants.js');
+const {
+  CHANNEL_TYPES,
+  ROLE_TYPES
+} = require('../constants.js');
 
 const { Guild, Channel } = models;
 
@@ -87,8 +90,15 @@ const verifySubmit = async (interaction, guildId) => {
     )
     .addComponents(
       new MessageButton()
-        .setCustomId(`verify-ally--${user.id}`)
-        .setLabel('Royal Ally')
+        .setCustomId(`verify-ally--${ROLE_TYPES.ALLY}--${user.id}`)
+        .setLabel('Ally')
+        .setStyle('SECONDARY')
+        .setDisabled(true)
+      )
+    .addComponents(
+      new MessageButton()
+        .setCustomId(`verify-ally--${ROLE_TYPES.AMBASSADOR}--${user.id}`)
+        .setLabel('Ambassador')
         .setStyle('SECONDARY')
         .setDisabled(true)
       );

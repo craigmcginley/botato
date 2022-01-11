@@ -41,6 +41,7 @@ module.exports = {
   },
   ROLE_TYPES: {
     VERIFIED: 'verified',
-    ALLY: 'ally'
+    ALLY: 'ally',
+    AMBASSADOR: 'ambassador'
   }
 };

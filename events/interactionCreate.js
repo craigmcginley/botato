@@ -57,11 +57,11 @@ module.exports = {
             verifyReject(interaction, params[1]);
             break;
           case 'verify-ally':
-            if (!params[1]) {
+            if (!params[1] || !params[2]) {
               await interaction.reply({ content: 'There was an error while executing this action.', ephemeral: true });
               return;
             }
-            verifyAlly(interaction, params[1]);
+            verifyAlly(interaction, params[2], params[1]);
             break;
           default:
             await interaction.reply({ content: 'There was an error while executing this action.', ephemeral: true });

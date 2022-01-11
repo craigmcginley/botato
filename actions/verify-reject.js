@@ -10,7 +10,8 @@ const { buildEmbed } = require('../helpers/embed.js');
 
 const {
   CHANNEL_TYPES,
-  REJECTION_REASONS
+  REJECTION_REASONS,
+  ROLE_TYPES
 } = require('../constants.js');
 
 const { Guild, Channel } = models;
@@ -114,6 +115,18 @@ const verifyReject = async (interaction, userId) => {
               .setCustomId(`verify-reject--${applicant.id}`)
               .setLabel('Reject')
               .setStyle('DANGER')
+            )
+          .addComponents(
+            new MessageButton()
+              .setCustomId(`verify-ally--${ROLE_TYPES.ALLY}--${applicant.id}`)
+              .setLabel('Ally')
+              .setStyle('SECONDARY')
+            )
+          .addComponents(
+            new MessageButton()
+              .setCustomId(`verify-ally--${ROLE_TYPES.AMBASSADOR}--${applicant.id}`)
+              .setLabel('Ambassador')
+              .setStyle('SECONDARY')
             );
 
         await updatedMessage.edit({
