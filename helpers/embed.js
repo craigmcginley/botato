@@ -3,6 +3,7 @@ const {
 } = require('discord.js');
 
 const buildEmbed = (title, color, guild, applicant, images, reviewer=null, reason=null) => {
+  // TODO: what does user.toString() actually output? Could I get better results by manually using <@{user-id}>?
   let fields = [
     { name: 'Profile', value: applicant.toString(), inline: true},
     { name: 'Username', value: `${applicant.user.username}#${applicant.user.discriminator}`, inline: true },

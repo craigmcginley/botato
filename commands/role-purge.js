@@ -31,7 +31,6 @@ module.exports = {
         return;
       }
       const guild = interaction.guild;
-      let guilds = await interaction.client.guilds.fetch();
       const members = await guild.members.fetch();
       console.log(`Checking roles of ${members.size} members`);
 
