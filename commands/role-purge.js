@@ -20,6 +20,9 @@ module.exports = {
       option.setName('exemption')
         .setDescription('Optional, exempt users who have this role.'))
     .addRoleOption(option =>
+      option.setName('optionalRole')
+        .setDescription('Optional, grant the users this role after purging'))
+    .addRoleOption(option =>
       option.setName('qualifier')
         .setDescription('Users must have this role in order to be evaluated by the command.'))
     .addStringOption(option =>
@@ -40,7 +43,8 @@ module.exports = {
       let exemptionRoleId = null;
       let qualifierRole = await interaction.options.getRole('qualifier');
       let qualifierRoleId = null;
-
+      let optionalRole = await interaction.options.getRole('optionalRole')
+      let optionalRoleId = null;
       let foreignServerId = await interaction.options.getString('foreign-server-exemption');
       let foreignGuild = null;
       let foreignRole = null;
@@ -107,6 +111,9 @@ module.exports = {
         // Otherwise, remove the target role if they have it
         if (roles.cache.some(role => role.id === targetRoleId)) {
           member.roles.remove(targetRoleId);
+          if(optionalRoleId){
+            member.roles.add(optionalRoleId)
+          }
           count += 1;
         }
       });
