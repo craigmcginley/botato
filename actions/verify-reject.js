@@ -1,8 +1,8 @@
 const {
-  MessageEmbed,
-  MessageActionRow,
-  MessageSelectMenu,
-  MessageButton,
+  EmbedBuilder,
+  ActionRowBuilder,
+  SelectMenuBuilder,
+  ButtonBuilder,
 } = require('discord.js');
 
 const { models } = require('../db/sequelize.js');
@@ -40,9 +40,9 @@ const verifyReject = async (interaction, userId) => {
       return;
     }
 
-    const rejectReason = new MessageActionRow()
+    const rejectReason = new ActionRowBuilder()
       .addComponents(
-        new MessageSelectMenu()
+        new SelectMenuBuilder()
           .setCustomId('verify-reject-reason')
           .setPlaceholder('Reason for rejection')
           .addOptions(REJECTION_REASONS),
@@ -68,7 +68,7 @@ const verifyReject = async (interaction, userId) => {
         images.push(embed.image);
       });
 
-      const embeds = buildEmbed('Rejected', 'RED', guild, applicant, images, i.user, reasonId);
+      const embeds = buildEmbed('Rejected', 'Red', guild, applicant, images, i.user, reasonId);
 
       const channels = await guildModel.getChannels()
       const channelModel = channels.find(channel => channel.type === CHANNEL_TYPES.REJECTED);
@@ -83,8 +83,8 @@ const verifyReject = async (interaction, userId) => {
 
       const reason = REJECTION_REASONS.find(reason => reason.value === reasonId);
 
-      const rejectEmbedUserDM = new MessageEmbed()
-        .setColor('RED')
+      const rejectEmbedUserDM = new EmbedBuilder()
+        .setColor('Red')
         .setTitle('Verification not approved')
         .setDescription(reason.explanation)
         .setTimestamp();
@@ -99,34 +99,38 @@ const verifyReject = async (interaction, userId) => {
     }
 
     // Wait for the mod to follow up with reason selection
-    await interaction.message.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 60000 })
+    await interaction.message.awaitMessageComponent({
+        filter,
+        componentType: 3, // SelectMenu
+        time: 60000
+      })
       .then(onSelect)
       .catch(async err => {
         // If the mod didn't select a reason in adequate time, revert back to approve/reject buttons
-        const reviewRow = new MessageActionRow()
+        const reviewRow = new ActionRowBuilder()
           .addComponents(
-            new MessageButton()
+            new ButtonBuilder()
               .setCustomId(`verify-approve--${applicant.id}`)
               .setLabel('Approve')
-              .setStyle('SUCCESS')
+              .setStyle('Success')
           )
           .addComponents(
-            new MessageButton()
+            new ButtonBuilder()
               .setCustomId(`verify-reject--${applicant.id}`)
               .setLabel('Reject')
-              .setStyle('DANGER')
+              .setStyle('Danger')
             )
           .addComponents(
-            new MessageButton()
+            new ButtonBuilder()
               .setCustomId(`verify-ally--${ROLE_TYPES.ALLY}--${applicant.id}`)
               .setLabel('Ally')
-              .setStyle('SECONDARY')
+              .setStyle('Secondary')
             )
           .addComponents(
-            new MessageButton()
+            new ButtonBuilder()
               .setCustomId(`verify-ally--${ROLE_TYPES.AMBASSADOR}--${applicant.id}`)
               .setLabel('Ambassador')
-              .setStyle('SECONDARY')
+              .setStyle('Secondary')
             );
 
         await updatedMessage.edit({

@@ -1,5 +1,7 @@
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+
+const { Flags } = PermissionsBitField;
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -20,7 +22,7 @@ module.exports = {
       option.setName('exemption')
         .setDescription('Optional, exempt users who have this role from being transferred.')),
     async execute(interaction) {
-      if (!interaction.member.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
+      if (!interaction.member.permissions.has(Flags.ManageRoles)) {
         await interaction.reply("You don't have permission to use this.");
         return;
       }

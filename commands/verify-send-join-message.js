@@ -1,8 +1,8 @@
 const {
-  MessageEmbed,
-  MessageActionRow,
-  MessageButton,
-  Permissions
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  PermissionsBitField
 } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { models } = require('../db/sequelize.js');
@@ -13,28 +13,30 @@ const {
 
 const { Guild, Channel } = models;
 
+const { Flags } = PermissionsBitField;
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('verify-send-join-message')
     .setDescription(`WARNING: Only works AFTER 'verify-create' command! Resends the join message to the join channel.`),
     async execute(interaction) {
-      if (!interaction.member.permissions.has(Permissions.FLAGS.MANAGE_ROLES) || !interaction.member.permissions.has(Permissions.FLAGS.MANAGE_CHANNELS)) {
+      if (!interaction.member.permissions.has(Flags.ManageRoles) || !interaction.member.permissions.has(Flags.ManageChannels)) {
         await interaction.reply("You don't have permission to use this.");
         return;
       }
 
       try {
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
           .setColor('#0099ff')
           .setTitle('Verify to join the SPUDs!')
           .setDescription(`Click the **Join the SPUDs** button below to get instructions for the SPUD verification process in order to join.`);
 
-        const action = new MessageActionRow()
+        const action = new ActionRowBuilder()
           .addComponents(
-            new MessageButton()
+            new ButtonBuilder()
               .setCustomId('verify')
               .setLabel('Join the SPUDs')
-              .setStyle('PRIMARY')
+              .setStyle('Primary')
           );
 
         const guild = interaction.guild;

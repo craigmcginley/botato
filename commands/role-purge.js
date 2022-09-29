@@ -1,4 +1,4 @@
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 const { models } = require('../db/sequelize.js');
@@ -7,6 +7,8 @@ const { Guild, Role } = models;
 const {
   ROLE_TYPES
 } = require('../constants.js');
+
+const { Flags } = PermissionsBitField;
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -26,7 +28,7 @@ module.exports = {
       option.setName('foreign-server-exemption')
         .setDescription('(Server ID string) Optional, exempt users who are verified in this server.')),
     async execute(interaction) {
-      if (!interaction.member.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
+      if (!interaction.member.permissions.has(Flags.ManageRoles)) {
         await interaction.reply("You don't have permission to use this.");
         return;
       }

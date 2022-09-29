@@ -1,8 +1,8 @@
 const {
-  MessageEmbed,
-  MessageActionRow,
-  MessageButton,
-  Permissions
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  PermissionsBitField
 } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { models } = require('../db/sequelize.js');
@@ -13,6 +13,8 @@ const {
 } = require('../constants.js');
 
 const { Guild, Channel, Role } = models;
+
+const { Flags } = PermissionsBitField;
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -31,23 +33,23 @@ module.exports = {
         .setDescription('The role to apply to users when they are verified.')
         .setRequired(true)),
     async execute(interaction) {
-      if (!interaction.member.permissions.has(Permissions.FLAGS.MANAGE_ROLES) || !interaction.member.permissions.has(Permissions.FLAGS.MANAGE_CHANNELS)) {
+      if (!interaction.member.permissions.has(Flags.ManageRoles) || !interaction.member.permissions.has(Flags.ManageChannels)) {
         await interaction.reply("You don't have permission to use this.");
         return;
       }
 
       try {
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
           .setColor('#0099ff')
           .setTitle('Verify to join the SPUDs!')
           .setDescription(`Click the **Join the SPUDs** button below to get instructions for the SPUD verification process in order to join.`);
 
-        const action = new MessageActionRow()
+        const action = new ActionRowBuilder()
           .addComponents(
-            new MessageButton()
+            new ButtonBuilder()
               .setCustomId('verify')
               .setLabel('Join the SPUDs')
-              .setStyle('PRIMARY')
+              .setStyle('Primary')
           );
 
         const guild = interaction.guild;
@@ -55,10 +57,13 @@ module.exports = {
         const welcomeChannel = await interaction.options.getChannel('welcome-channel');
         const verifiedRole = await interaction.options.getRole('verified-role');
 
-        const category = await guild.channels.create("Verifications", { type: "GUILD_CATEGORY" });
-        const pendingChannel = await guild.channels.create("pending");
-        const approvedChannel = await guild.channels.create("approved");
-        const rejectedChannel = await guild.channels.create("rejected");
+        const category = await guild.channels.create({
+          name: 'Verifications',
+          type: 4 // GuildCategory
+        });
+        const pendingChannel = await guild.channels.create({ name: 'pending' });
+        const approvedChannel = await guild.channels.create({ name: 'approved' });
+        const rejectedChannel = await guild.channels.create({ name: 'rejected' });
 
         pendingChannel.setParent(category.id);
         approvedChannel.setParent(category.id);

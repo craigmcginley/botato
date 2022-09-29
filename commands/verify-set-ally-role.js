@@ -1,8 +1,8 @@
 const {
-  MessageEmbed,
-  MessageActionRow,
-  MessageButton,
-  Permissions
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  PermissionsBitField
 } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { models } = require('../db/sequelize.js');
@@ -13,6 +13,8 @@ const {
 } = require('../constants.js');
 
 const { Guild, Role } = models;
+
+const { Flags } = PermissionsBitField;
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -27,7 +29,7 @@ module.exports = {
         .setDescription('The role to apply to users that are approved as ambassador.')
         .setRequired(true)),
     async execute(interaction) {
-      if (!interaction.member.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
+      if (!interaction.member.permissions.has(Flags.ManageRoles)) {
         await interaction.reply("You don't have permission to use this.");
         return;
       }

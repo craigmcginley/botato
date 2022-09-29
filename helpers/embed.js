@@ -1,5 +1,5 @@
 const {
-  MessageEmbed
+  EmbedBuilder
 } = require('discord.js');
 
 const buildEmbed = (title, color, guild, applicant, images, reviewer=null, reason=null) => {
@@ -20,7 +20,7 @@ const buildEmbed = (title, color, guild, applicant, images, reviewer=null, reaso
   }
 
   const embeds = images.map(image => {
-    return embed = new MessageEmbed()
+    return embed = new EmbedBuilder()
       .setTitle(title)
       .setColor(color)
       .setURL(`https://spud-botato.herokuapp.com/${guild.id}/${applicant.id}`)

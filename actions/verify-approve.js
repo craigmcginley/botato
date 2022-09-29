@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 
 const { models } = require('../db/sequelize.js');
 const { buildEmbed } = require('../helpers/embed.js');
@@ -47,7 +47,7 @@ const verifyApprove = async (interaction, userId) => {
       images.push(embed.image);
     });
 
-    const embeds = buildEmbed('Approved', 'GREEN', guild, applicant, images, interaction.user);
+    const embeds = buildEmbed('Approved', 'Green', guild, applicant, images, interaction.user);
 
     // Delete the message from the pending channel
     await interaction.message.delete();
@@ -57,8 +57,8 @@ const verifyApprove = async (interaction, userId) => {
       embeds: embeds
     });
 
-    const approveEmbedUserDM = new MessageEmbed()
-      .setColor('GREEN')
+    const approveEmbedUserDM = new EmbedBuilder()
+      .setColor('Green')
       .setTitle('Verified')
       .setDescription(`You've been verified! Please read the instructions in <#${welcomeChannel.discord_id}> to finish your join process, and we'll see you out there!`)
       .setTimestamp();

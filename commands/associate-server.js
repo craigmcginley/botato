@@ -1,4 +1,4 @@
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 const { models } = require('../db/sequelize.js');
@@ -7,6 +7,8 @@ const { Guild, Role } = models;
 const {
   ROLE_TYPES
 } = require('../constants.js');
+
+const { Flags } = PermissionsBitField;
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -20,7 +22,7 @@ module.exports = {
       option.setName('addition-role')
         .setDescription('An optional additional role to apply when applying the verified role.')),
     async execute(interaction) {
-      if (!interaction.member.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
+      if (!interaction.member.permissions.has(Flags.ManageRoles)) {
         await interaction.reply("You don't have permission to use this.");
         return;
       }
@@ -69,6 +71,6 @@ module.exports = {
       // TODO: Need to associate guilds... best way? Guilds need many to many relationship
       // guildInstance.set
 
-      await interaction.reply(`Finished! Please allow time for rate-limiting restrictions to remove all applicable users from the role '${targetRole.name}'`);
+      await interaction.reply(`Finished!`);
   },
 };

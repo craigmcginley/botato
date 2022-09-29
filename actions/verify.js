@@ -1,7 +1,7 @@
 const {
-  MessageEmbed,
-  MessageActionRow,
-  MessageButton
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder
 } = require('discord.js');
 
 const { models } = require('../db/sequelize.js');
@@ -13,7 +13,7 @@ const { Guild, Member } = models;
 const verify = async (interaction) => {
   try {
     const user = interaction.user;
-    const verifyEmbed = new MessageEmbed()
+    const verifyEmbed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle('Verify to join the SPUDs!')
       .setDescription(`
@@ -40,14 +40,14 @@ const verify = async (interaction) => {
       )
       .setImage('https://images-ext-2.discordapp.net/external/dzpvSd3hefY-L8SGAAmw2O-t6AMXo9s_g_oXjU6_hVg/https/media.discordapp.net/attachments/891078787138203689/894954670840234034/Login.PNG')
       .setTimestamp()
-      .setFooter(`If you have any questions, you can ask a SPUD officer.`);
+      .setFooter({ text: `If you have any questions, you can ask a SPUD officer.` });
 
-    const submitAction = new MessageActionRow()
+    const submitAction = new ActionRowBuilder()
       .addComponents(
-        new MessageButton()
+        new ButtonBuilder()
           .setCustomId(`verify-submit--${interaction.guildId}`)
           .setLabel('Submit')
-          .setStyle('PRIMARY')
+          .setStyle('Primary')
       );
 
     const guild = await Guild.findOne({

@@ -1,8 +1,8 @@
 const {
-  MessageEmbed,
-  MessageActionRow,
-  MessageButton,
-  Permissions
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  PermissionsBitField
 } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { models } = require('../db/sequelize.js');
@@ -11,6 +11,8 @@ const { CHANNEL_TYPES } = require('../constants.js');
 
 const { Guild, Channel, Role } = models;
 
+const { Flags } = PermissionsBitField;
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('verify-destroy')
@@ -18,7 +20,7 @@ module.exports = {
     async execute(interaction) {
       // TODO: Maybe add a confirmation since this is a highly destructive command.
 
-      if (!interaction.member.permissions.has(Permissions.FLAGS.MANAGE_ROLES) || !interaction.member.permissions.has(Permissions.FLAGS.MANAGE_CHANNELS)) {
+      if (!interaction.member.permissions.has(Flags.ManageRoles) || !interaction.member.permissions.has(Flags.ManageChannels)) {
         await interaction.reply("You don't have permission to use this.");
         return;
       }

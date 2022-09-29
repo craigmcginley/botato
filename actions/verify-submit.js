@@ -1,6 +1,6 @@
 const {
-  MessageActionRow,
-  MessageButton
+  ActionRowBuilder,
+  ButtonBuilder
 } = require('discord.js');
 
 const { models } = require('../db/sequelize.js');
@@ -71,35 +71,35 @@ const verifySubmit = async (interaction, guildId) => {
     return;
   }
 
-  const embeds = buildEmbed('New verification submission', 'GREEN', guild, applicant, images);
+  const embeds = buildEmbed('New verification submission', 'Blue', guild, applicant, images);
 
-  const reviewRow = new MessageActionRow()
+  const reviewRow = new ActionRowBuilder()
     .addComponents(
-      new MessageButton()
+      new ButtonBuilder()
         .setCustomId(`verify-approve--${user.id}`)
         .setLabel('Approve')
-        .setStyle('SUCCESS')
+        .setStyle('Success')
         .setDisabled(true)
     )
     .addComponents(
-      new MessageButton()
+      new ButtonBuilder()
         .setCustomId(`verify-reject--${user.id}`)
         .setLabel('Reject')
-        .setStyle('DANGER')
+        .setStyle('Danger')
         .setDisabled(true)
     )
     .addComponents(
-      new MessageButton()
+      new ButtonBuilder()
         .setCustomId(`verify-ally--${ROLE_TYPES.ALLY}--${user.id}`)
         .setLabel('Ally')
-        .setStyle('SECONDARY')
+        .setStyle('Secondary')
         .setDisabled(true)
       )
     .addComponents(
-      new MessageButton()
+      new ButtonBuilder()
         .setCustomId(`verify-ally--${ROLE_TYPES.AMBASSADOR}--${user.id}`)
         .setLabel('Ambassador')
-        .setStyle('SECONDARY')
+        .setStyle('Secondary')
         .setDisabled(true)
       );
 

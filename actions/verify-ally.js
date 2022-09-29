@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 
 const { models } = require('../db/sequelize.js');
 const { buildEmbed } = require('../helpers/embed.js');
@@ -46,7 +46,7 @@ const verifyAlly = async (interaction, userId, type) => {
       images.push(embed.image);
     });
 
-    const embeds = buildEmbed('Approved - ' + type, 'FUCHSIA', guild, applicant, images, interaction.user);
+    const embeds = buildEmbed('Approved - ' + type, 'Fuchsia', guild, applicant, images, interaction.user);
 
     // Delete the message from the pending channel
     await interaction.message.delete();
@@ -56,8 +56,8 @@ const verifyAlly = async (interaction, userId, type) => {
       embeds: embeds
     });
 
-    const approveEmbedUserDM = new MessageEmbed()
-      .setColor('GREEN')
+    const approveEmbedUserDM = new EmbedBuilder()
+      .setColor('Green')
       .setTitle('Verified')
       .setDescription(`You've been verified and are now a Royal Ally! You have access to the royal-allies chat and our voice channels.`)
       .setTimestamp();
