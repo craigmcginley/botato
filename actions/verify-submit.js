@@ -53,10 +53,10 @@ const verifySubmit = async (interaction, guildId) => {
   });
 
   messages.forEach(message => {
-    if (message.author.id === user.id && message.attachments) {
+    if (message.createdTimestamp > botMessageTime && message.author.id === user.id && message.attachments) {
       let sortedAttachments = message.attachments.sort(sortByCreatedTimestamp);
       sortedAttachments.forEach(attachment => {
-        if (attachment.contentType.includes('image') && message.createdTimestamp > botMessageTime) {
+        if (attachment && attachment.contentType && attachment.contentType.includes('image')) {
           images.push(attachment);
         }
       })

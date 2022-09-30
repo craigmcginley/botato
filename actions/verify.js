@@ -85,9 +85,16 @@ const verify = async (interaction) => {
     user.send({
       embeds: [verifyEmbed],
       components: [submitAction]
-    });
+    }).then(() => {
+      interaction.deferUpdate();
+    }).catch(async () => {
+      member.destroy();
 
-    interaction.deferUpdate();
+      interaction.reply({
+        content: "Unable to DM you. Please check that your discord settings allow direct messages as outlined in the directions above.",
+        ephemeral: true
+      });
+    });
   } catch(e) {
     console.log(e);
     await interaction.reply({
