@@ -13,33 +13,36 @@ const { Flags } = PermissionsBitField;
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('associate-server')
-    .setDescription('Automatically verify new users who join, who are already verified in the associated server.')
+    .setDescription('Set up a foreign server association to enable other functions.')
     .addStringOption(option =>
-      option.setName('foreign-server')
-        .setDescription('(Server ID string) The server to associate.')
-        .setRequired(true))
-    .addRoleOption(option =>
-      option.setName('addition-role')
-        .setDescription('An optional additional role to apply when applying the verified role.')),
+      option.setName('foreign-server-id')
+        .setDescription('(string) The Discord ID of the server to associate.')
+        .setRequired(true)),
     async execute(interaction) {
       if (!interaction.member.permissions.has(Flags.ManageRoles)) {
         await interaction.reply("You don't have permission to use this.");
         return;
       }
+
       const guild = interaction.guild;
-      let foreignServerId = await interaction.options.getString('foreign-server');
-      let guildInstance = null;
-      let additionalRole = await interaction.options.getRole('additional-role');
+      let foreignServerId = await interaction.options.getString('foreign-server-id');
+      let associatedGuildInstance = null;
+
+      let guildInstance = await Guild.findOne({
+        where: {
+          discord_id: guild.id
+        }
+      });
 
       // Find the foreign server instance in the database
       try {
-        guildInstance = await Guild.findOne({
+        associatedGuildInstance = await Guild.findOne({
           where: {
             discord_id: foreignServerId
           }
         });
 
-        if (!guildInstance) {
+        if (!associatedGuildInstance) {
           throw new Error("Couldn't find guild");
         }
 
@@ -49,23 +52,7 @@ module.exports = {
         return;
       }
 
-      // If there's an additional role to set, add it in the database
-      if (additionalRole) {
-        const additionalRoleInstance = await Role.findOrCreate({
-          where: {
-            GuildId: guildInstance.id,
-            type: ROLE_TYPES.ADDITIONAL
-          },
-          defaults: {
-            discord_id: additionalRole.id,
-            type: ROLE_TYPES.ADDITIONAL
-          }
-        });
-
-        additionalRoleInstance[0].discord_id = additionalRole.id;
-        await additionalRoleInstance[0].setGuild(guildInstance);
-        await additionalRoleInstance[0].save();
-      }
+      guildInstance.addAssociatedGuild(associatedGuildInstance);
 
       // Register this guild as something to check against when member is added
       // TODO: Need to associate guilds... best way? Guilds need many to many relationship

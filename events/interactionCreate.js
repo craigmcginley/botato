@@ -3,12 +3,21 @@ const { verifySubmit } = require('../actions/verify-submit.js');
 const { verifyApprove } = require('../actions/verify-approve.js');
 const { verifyReject } = require('../actions/verify-reject.js');
 const { verifyAlly } = require('../actions/verify-ally.js');
+const { runRules } = require('../actions/run-rules.js');
+const { autocompleteForeignServerRule } = require('../helpers/autocompleteForeignServerRule.js');
 
 
 module.exports = {
   name: 'interactionCreate',
   async execute(interaction) {
-    if (!(interaction.isCommand() || interaction.isButton())) return;
+    if (!(interaction.isCommand() || interaction.isButton() || interaction.isAutocomplete())) return;
+
+    if (interaction.isAutocomplete()) {
+      if (interaction.commandName === 'create-foreign-server-rule') {
+        autocompleteForeignServerRule(interaction);
+      }
+    };
+
     console.log(`${interaction.user.tag} triggered ${interaction.commandName || interaction.customId} from ${interaction.channel && interaction.channel.name ? '#' + interaction.channel.name : 'DM'}`);
 
     if (interaction.isCommand()) {
@@ -62,6 +71,9 @@ module.exports = {
               return;
             }
             verifyAlly(interaction, params[2], params[1]);
+            break;
+          case 'run-rules':
+            runRules(interaction);
             break;
           default:
             await interaction.reply({ content: 'There was an error while executing this action.', ephemeral: true });
