@@ -1,4 +1,4 @@
-const { PermissionsBitField } = require('discord.js');
+const { Permissions } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 const { models } = require('../db/sequelize.js');
@@ -8,30 +8,27 @@ const {
   ROLE_TYPES
 } = require('../constants.js');
 
-const { Flags } = PermissionsBitField;
-
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('role-purge')
-    .setDescription('Removes all users from the specified role.')
+    .setDescription('Adds users from the specified role depending on their vetter roles in another server.')
     .addRoleOption(option =>
-      option.setName('target')
-        .setDescription('The role you want to remove users from.')
+      option.setName('target') //Sundial Member
+        .setDescription('The role you want to add users to.')
         .setRequired(true))
     .addRoleOption(option =>
-      option.setName('exemption')
-        .setDescription('Optional, exempt users who have this role.'))
+      option.setName('secondary') //Royal Spuds in Sundial
+        .setDescription('Optional, also grant this role.'))
     .addRoleOption(option =>
-      option.setName('optionalRole')
-        .setDescription('Optional, grant the users this role after purging'))
-    .addRoleOption(option =>
-      option.setName('qualifier')
-        .setDescription('Users must have this role in order to be evaluated by the command.'))
+      option.setName('unvettedRole') //Unvetted in Sundial
+        .setDescription('Users must have the Unvetted role in order to be evaluated by the command.'))
+        .setRequired(true)
     .addStringOption(option =>
       option.setName('foreign-server-exemption')
-        .setDescription('(Server ID string) Optional, exempt users who are verified in this server.')),
+        .setDescription('(Server ID string) required, check for users who are verified in this server.')),
+        .setRequired(true)
     async execute(interaction) {
-      if (!interaction.member.permissions.has(Flags.ManageRoles)) {
+      if (!interaction.member.permissions.has(Permissions.FLAGS.MANAGE_ROLES)) {
         await interaction.reply("You don't have permission to use this.");
         return;
       }
@@ -41,24 +38,23 @@ module.exports = {
 
       const targetRole = await interaction.options.getRole('target');
       const targetRoleId = targetRole.id;
-      let exemptionRole = await interaction.options.getRole('exemption');
-      let exemptionRoleId = null;
-      let qualifierRole = await interaction.options.getRole('qualifier');
-      let qualifierRoleId = null;
-      let optionalRole = await interaction.options.getRole('optionalRole')
-      let optionalRoleId = null;
+      let secondaryRole = await interaction.options.getRole('secondary');
+      let secondaryRoleId = null;
+      let unvettedRoleRole = await interaction.options.getRole('unvettedRole');
+      let unvettedRoleRoleId = null;
+
       let foreignServerId = await interaction.options.getString('foreign-server-exemption');
       let foreignGuild = null;
       let foreignRole = null;
 
       let count = 0;
 
-      if (exemptionRole) {
-        exemptionRoleId = exemptionRole.id;
+      if (secondaryRole) {
+        secondaryRoleId = secondaryRole.id;
       }
 
-      if (qualifierRole) {
-        qualifierRoleId = qualifierRole.id;
+      if (unvettedRoleRole) {
+        unvettedRoleRoleId = unvettedRoleRole.id;
       }
 
       if (foreignServerId) {
@@ -85,17 +81,12 @@ module.exports = {
       members.forEach(async member => {
         const roles = member.roles;
 
-        // Skip this member if they have the exemption role
-        if (exemptionRoleId && roles.cache.some(role => role.id === exemptionRoleId)) {
+        // Skip this member if they don't have the unvettedRole role
+        if (unvettedRoleRoleId && !(roles.cache.some(role => role.id === unvettedRoleRoleId))) {
           return;
         }
 
-        // Skip this member if they don't have the qualifier role
-        if (qualifierRoleId && !(roles.cache.some(role => role.id === qualifierRoleId))) {
-          return;
-        }
-
-        // Skip this member if they are verified in the specific foreign server
+        // Only modify this member if they are verified in the specific foreign server
         if (foreignServerId) {
           let foreignUser = null;
 
@@ -106,17 +97,11 @@ module.exports = {
           }
 
           if (foreignUser && foreignUser.roles.cache.some(role => role.id === foreignRole.discord_id)) {
-            return;
+            if (roles.cache.some(role => role.id === targetRoleId)) {
+              member.roles.add(targetRoleId);
+              count += 1;
+            }
           }
-        }
-
-        // Otherwise, remove the target role if they have it
-        if (roles.cache.some(role => role.id === targetRoleId)) {
-          member.roles.remove(targetRoleId);
-          if(optionalRoleId){
-            member.roles.add(optionalRoleId)
-          }
-          count += 1;
         }
       });
 
